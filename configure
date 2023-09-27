@@ -77,7 +77,6 @@ set_hostname
 generate_locales
 set_timezone
 set_hwclock
-enable_sudo_for_wheel_users
 set_root_password
 ${dir}/aufii
 
