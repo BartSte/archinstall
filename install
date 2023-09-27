@@ -139,7 +139,7 @@ mount_partitions() {
 }
 
 install_base_system() {
-    pacstrap /mnt base base-devel linux linux-firmware
+    pacstrap /mnt base base-devel linux linux-firmware efibootmgr
 }
 
 configure_base_system() {
