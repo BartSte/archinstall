@@ -1,1 +1,167 @@
 #!/usr/bin/env bash
+
+usages() {
+    cat <<EOF
+Usage: $0 [options] <disk> <hostname> <password>
+
+This script will install Arch Linux on the specified disk. The disk will be
+partitioned and formatted. The script will then install the base system and
+configure it. Finally, the script will install the bootloader and configure it.
+
+The following is assumed:
+- You booted with a live USB.
+- Your boot mode is UEFI.
+- Your UEFI bitness is 64-bit.
+- You have setup an internet connection.
+
+The following is done:
+- The disk is partitioned with a GPT partition table with:
+    - part 1, label "EFI system partition": 512MiB EFI partition (FAT32)
+    - part 2, label "Swap partition": 4GiB swap partition (swap)
+    - part 3, label "Root partition": 100% of the remaining space (ext4)
+- The partitions are formatted.
+- The base system is installed.
+
+Arguments aka global variables:
+    disk            Disk to install to
+    hostname        Hostname of the machine
+    username        Username of the user to create
+    password        Password of the root and the user
+
+Options:
+    -h, --help      Show this help message and exit
+    
+EOF
+}
+
+get_dir() {
+    echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h | --help)
+                usages
+                exit 0
+                ;;
+            *)
+                if [[ -z $disk ]]; then
+                    disk=$1
+                elif [[ -z $hostname ]]; then
+                    hostname=$1
+                elif [[ -z $username ]]; then
+                    username=$1
+                elif [[ -z $password ]]; then
+                    password=$1
+                else
+                    abort "Too many arguments"
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+is_root() {
+    if [[ $EUID -ne 0 ]]; then
+        abort "You must be root to run this script"
+    fi
+}
+
+is_disk_exists() {
+    if [[ ! -b $disk ]]; then
+        abort "Disk $disk not found, or is not a block device"
+    fi
+}
+
+is_disk_not_mounted() {
+    if [[ ! -z "$(cat /proc/mounts | grep ${disk})" ]]; then
+        abort "Disk $disk is mounted somewhere"
+    fi
+}
+
+is_uefi() {
+    [ -d /sys/firmware/efi ] && return 0 || abort "UEFI not detected"
+}
+
+is_uefi_bitness() {
+    cat /sys/firmware/efi/fw_platform_size | grep -q $1 && return 0 || abort "UEFI is not $1-bit"
+}
+
+is_clock_synchronized() {
+    timedatectl status | grep -q "System clock synchronized: yes" && return 0 || warn "System clock is not synchronized"
+}
+
+warn() {
+    echo "WARNING: $1" >/dev/stderr
+}
+
+abort() {
+    echo "ERROR: $1" >/dev/stderr
+    exit 1
+}
+
+partition_disk() {
+    parted -s $disk mklabel gpt
+    parted -s $disk mkpart "EFI system partition" fat32 1MiB 513MiB
+    parted -s $disk mkpart "Swap partition" linux-swap 513MiB 4.5GiB
+    parted -s $disk mkpart "Root partition" ext4 4.5GiB 100%
+    parted -s $disk set 1 esp on
+}
+
+format_partitions() {
+    mkfs.fat -F32 ${disk}1
+    mkswap ${disk}2
+    swapon ${disk}2
+    mkfs.ext4 ${disk}3
+}
+
+mount_partitions() {
+    mount ${disk}3 /mnt
+    mkdir /mnt/boot
+    mount ${disk}1 /mnt/boot
+}
+
+install_base_system() {
+    pacstrap /mnt base base-devel linux linux-firmware
+}
+
+configure_base_system() {
+    genfstab -U /mnt >>/mnt/etc/fstab
+
+    dir=$(get_dir)
+    cp ${dir}/configure /mnt
+    cp ${dir}/visudo_editor /mnt
+    cp ${dir}/aufii /mnt
+
+    arch-chroot /mnt /configure $disk $hostname $username $password
+
+    rm /mnt/configure
+    rm /mnt/visudo_editor
+    rm /mnt/aufii
+}
+
+finalize() {
+    umount -R /mnt
+    echo "Installation complete. You can now reboot if you successfully completed all steps." >/dev/stderr
+}
+
+set -e # Abort on error
+
+parse_args $@
+
+is_root
+is_disk_exists
+is_disk_not_mounted
+is_uefi
+is_uefi_bitness 64
+is_clock_synchronized
+
+partition_disk
+format_partitions
+mount_partitions
+install_base_system
+configure_base_system
+
+finalize

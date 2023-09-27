@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+usages() {
+    cat <<EOF
+Usage: $0 [options] <disk> <hostname> <password>
+
+This script configures an Arch Linux installation. It assumes that the base
+system is already installed. This script will configure the following:
+- sets the hostname to <hostname>
+- generates locales for en_US.UTF-8
+- sets the timezone to Europe/Amsterdam
+- sets the hardware clock
+- sets the root password to <password>
+- adds a user with username <username> and password <password>
+- installs and configures EFISTUB using efibootmgr.
+
+Note that the root and user have the same password.
+
+EOF
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h | --help)
+                usages
+                exit 0
+                ;;
+            *)
+                if [[ -z $disk ]]; then
+                    disk=$1
+                elif [[ -z $hostname ]]; then
+                    hostname=$1
+                elif [[ -z $username ]]; then
+                    username=$1
+                elif [[ -z $password ]]; then
+                    password=$1
+                else
+                    abort "Too many arguments"
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+set_hostname() {
+    echo $hostname > /etc/hostname
+}
+
+generate_locales() {
+    sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
+    locale-gen
+    echo LANG=en_US.UTF-8 > /etc/locale.conf
+}
+
+set_timezone() {
+    ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+}
+
+set_hwclock() {
+    hwclock --systohc
+}
+
+enable_sudo_for_wheel_users() {
+    export EDITOR="/visudo_editor" && visudo
+}
+
+set_root_password() {
+    echo "root:${password}" | chpasswd
+}
+
+add_user() {
+    useradd -m -g users -G wheel -s /bin/bash ${username}
+    echo "${username}:${password}" | chpasswd
+}
+
+get_dir() {
+    echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+}
+
+dir=$(get_dir)
+set_hostname
+generate_locales
+set_timezone
+set_hwclock
+enable_sudo_for_wheel_users
+set_root_password
+add_user
+${dir}/aufii
+
+echo "Configuration complete." > /dev/stderr
