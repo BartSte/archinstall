@@ -2,7 +2,7 @@
 
 usages() {
     cat <<EOF
-Usage: install [options] <disk> <hostname> <username> <password>
+Usage: install [options] <disk> <hostname> <username>
 
 This script will install Arch Linux on the specified disk. The disk will be
 partitioned and formatted. The script will then install the base system and
@@ -31,7 +31,6 @@ Arguments aka global variables:
     disk            Disk to install to
     hostname        Hostname of the machine
     username        Username of the user to create
-    password        Password of the root and the user
 
 Options:
     -h, --help      Show this help message and exit
@@ -71,8 +70,6 @@ parse_args() {
                     hostname=$1
                 elif [[ -z $username ]]; then
                     username=$1
-                elif [[ -z $password ]]; then
-                    password=$1
                 else
                     abort "Too many arguments"
                 fi
@@ -154,7 +151,7 @@ configure_base_system() {
     cp ${dir}/visudo_editor /mnt
     cp ${dir}/aufii /mnt
 
-    arch-chroot /mnt /configure $disk $hostname $username $password
+    arch-chroot /mnt /configure $disk $hostname $username
 
     rm /mnt/configure
     rm /mnt/visudo_editor
