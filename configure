@@ -43,10 +43,13 @@ parse_args() {
                 ;;
         esac
     done
-
-    [[ -z $disk ]] && abort "Disk not specified"
-    [[ -z $hostname ]] && abort "Hostname not specified"
-    [[ -z $username ]] && abort "Username not specified"
+    if [[ -z $disk ]]; then
+        abort "Disk not specified"
+    elif [[ -z $hostname ]]; then
+        abort "Hostname not specified"
+    elif [[ -z $username ]]; then
+        abort "Username not specified"
+    fi
 }
 
 set_hostname() {

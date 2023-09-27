@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-usages() {
+usage() {
     cat <<EOF
 Usage: install [options] <disk> <hostname> <username>
 
@@ -50,7 +50,7 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h | --help)
-                usages
+                usage
                 exit 0
                 ;;
             *)
@@ -67,9 +67,13 @@ parse_args() {
                 ;;
         esac
     done
-    [[ -z $disk ]] && abort "Disk not specified"
-    [[ -z $hostname ]] && abort "Hostname not specified"
-    [[ -z $username ]] && abort "Username not specified"
+    if [[ -z $disk ]]; then
+        abort "Disk not specified"
+    elif [[ -z $hostname ]]; then
+        abort "Hostname not specified"
+    elif [[ -z $username ]]; then
+        abort "Username not specified"
+    fi
 }
 
 is_root() {
