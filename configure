@@ -86,6 +86,8 @@ create_user() {
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 set -e
 
+parse_args $@
+
 set_hostname
 generate_locales
 set_timezone
