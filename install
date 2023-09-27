@@ -2,7 +2,7 @@
 
 usages() {
     cat <<EOF
-Usage: $0 [options] <disk> <hostname> <password>
+Usage: $0 [options] <disk> <hostname> <username> <password>
 
 This script will install Arch Linux on the specified disk. The disk will be
 partitioned and formatted. The script will then install the base system and
@@ -15,6 +15,11 @@ The following is assumed:
 - You have setup an internet connection.
 
 The following is done:
+- The other scripts are downloaded from GitHub using curl and they are made 
+  executable. These scripts are:
+    - configure
+    - visudo_editor
+    - aufii
 - The disk is partitioned with a GPT partition table with:
     - part 1, label "EFI system partition": 512MiB EFI partition (FAT32)
     - part 2, label "Swap partition": 4GiB swap partition (swap)
@@ -32,6 +37,19 @@ Options:
     -h, --help      Show this help message and exit
     
 EOF
+}
+
+curl_scripts() {
+    local this_dir
+    this_dir=$(get_dir)
+    url=https://raw.githubusercontent.com/BartSte/archinstall/main
+    curl -O $url/configure
+    curl -O $url/visudo_editor
+    curl -O $url/aufii
+
+    chmod +x $this_dir/configure
+    chmod +x $this_dir/visudo_editor
+    chmod +x $this_dir/aufii
 }
 
 get_dir() {
@@ -104,10 +122,14 @@ abort() {
 
 partition_disk() {
     parted -s $disk mklabel gpt
-    parted -s $disk mkpart "EFI system partition" fat32 1MiB 513MiB
-    parted -s $disk mkpart "Swap partition" linux-swap 513MiB 4.5GiB
-    parted -s $disk mkpart "Root partition" ext4 4.5GiB 100%
+    parted -s $disk mkpart fat32 1MiB 513MiB
+    parted -s $disk mkpart linux-swap 513MiB 4.5GiB
+    parted -s $disk mkpart ext4 4.5GiB 100%
     parted -s $disk set 1 esp on
+
+    parted -s name 1 "EFI system partition"
+    parted -s name 2 "Swap partition"
+    parted -s name 3 "Root partition"
 }
 
 format_partitions() {
@@ -150,6 +172,8 @@ finalize() {
 set -e # Abort on error
 
 parse_args $@
+
+curl_scripts
 
 is_root
 is_disk_exists
