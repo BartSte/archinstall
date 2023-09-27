@@ -80,7 +80,12 @@ create_user() {
     useradd -m -G wheel $username
     echo "Set the password for $username" >/dev/stderr
     passwd $username
-    sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
+}
+
+make_wheel_sudoers() {
+    old_editor=$EDITOR
+    export EDITOR="$SCRIPTPATH/visudo_editor" && visudo
+    export EDITOR=$old_editor
 }
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -94,6 +99,7 @@ set_timezone
 set_hwclock
 set_root_password
 create_user
+make_wheel_sudoers
 $SCRIPTPATH/aufii
 
 echo "Configuration complete." >/dev/stderr

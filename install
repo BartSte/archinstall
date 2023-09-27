@@ -41,9 +41,11 @@ curl_scripts() {
 
     curl -O $url/configure
     curl -O $url/aufii
+    curl -O $url/visudo_editor
 
     chmod +x $SCRIPTPATH/configure
     chmod +x $SCRIPTPATH/aufii
+    chmod +x $SCRIPTPATH/visudo_editor
 }
 
 parse_args() {
@@ -145,11 +147,13 @@ configure_base_system() {
 
     cp $SCRIPTPATH/configure /mnt
     cp $SCRIPTPATH/aufii /mnt
+    cp $SCRIPTPATH/visudo_editor /mnt
 
     arch-chroot /mnt /configure $disk $hostname $username
 
-    rm /mnt/configure
-    rm /mnt/aufii
+    rm /mnt/configure -f
+    rm /mnt/aufii -f
+    rm /mnt/visudo_editor -f
 }
 
 finalize() {
