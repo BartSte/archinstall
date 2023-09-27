@@ -34,7 +34,6 @@ Arguments aka global variables:
 
 Options:
     -h, --help      Show this help message and exit
-    
 EOF
 }
 
