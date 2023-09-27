@@ -2,7 +2,7 @@
 
 usages() {
     cat <<EOF
-Usage: install [options] <disk> <hostname>
+Usage: install [options] <disk> <hostname> <username>
 
 This script will install Arch Linux on the specified disk. The disk will be
 partitioned and formatted. The script will then install the base system and
@@ -24,7 +24,7 @@ The following is done:
     - part 2, label "Swap partition": 4GiB swap partition (swap)
     - part 3, label "Root partition": 100% of the remaining space (ext4)
 - The partitions are formatted.
-- The base system is installed.
+- The base system is installed, see the configure script for details.
 
 Arguments aka global variables:
     disk            Disk to install to
@@ -63,6 +63,8 @@ parse_args() {
                     disk=$1
                 elif [[ -z $hostname ]]; then
                     hostname=$1
+                elif [[ -z $username ]]; then
+                    username=$1
                 else
                     abort "Too many arguments"
                 fi
@@ -70,6 +72,9 @@ parse_args() {
                 ;;
         esac
     done
+    [[ -z $disk ]] && abort "Disk not specified"
+    [[ -z $hostname ]] && abort "Hostname not specified"
+    [[ -z $username ]] && abort "Username not specified"
 }
 
 is_root() {
@@ -133,7 +138,7 @@ mount_partitions() {
 }
 
 install_base_system() {
-    pacstrap /mnt base base-devel linux linux-firmware efibootmgr intel-ucode amd-ucode
+    pacstrap /mnt base base-devel linux linux-firmware efibootmgr intel-ucode amd-ucode sudo
 }
 
 configure_base_system() {
@@ -143,7 +148,7 @@ configure_base_system() {
     cp ${dir}/configure /mnt
     cp ${dir}/aufii /mnt
 
-    arch-chroot /mnt /configure $disk $hostname
+    arch-chroot /mnt /configure $disk $hostname $username
 
     rm /mnt/configure
     rm /mnt/aufii

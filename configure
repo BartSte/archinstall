@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-usages() {
+usage() {
     cat <<EOF
-Usage: $0 [options] <disk> <hostname>
+Usage: $0 [options] <disk> <hostname> <username>
 
 This script configures an Arch Linux installation. It assumes that the base
 system is already installed. This script will configure the following:
@@ -11,6 +11,11 @@ system is already installed. This script will configure the following:
 - sets the timezone to Europe/Amsterdam
 - sets the hardware clock
 - sets the root password by a prompt
+- creates a user account that has the following:
+    - a home directory
+    - is part of the wheel group
+    - can use sudo without a password
+    - uses zsh as the default shell
 - installs and configures EFISTUB using efibootmgr.
 
 Note that the root and user have the same password.
@@ -18,11 +23,15 @@ Note that the root and user have the same password.
 EOF
 }
 
+get_dir() {
+    echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+}
+
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h | --help)
-                usages
+                usage
                 exit 0
                 ;;
             *)
@@ -30,6 +39,8 @@ parse_args() {
                     disk=$1
                 elif [[ -z $hostname ]]; then
                     hostname=$1
+                elif [[ -z $username ]]; then
+                    username=$1
                 else
                     abort "Too many arguments"
                 fi
@@ -38,12 +49,9 @@ parse_args() {
         esac
     done
 
-    if [[ -z $disk ]]; then
-        abort "No disk specified"
-    fi
-    if [[ -z $hostname ]]; then
-        abort "No hostname specified"
-    fi
+    [[ -z $disk ]] && abort "Disk not specified"
+    [[ -z $hostname ]] && abort "Hostname not specified"
+    [[ -z $username ]] && abort "Username not specified"
 }
 
 set_hostname() {
@@ -65,11 +73,16 @@ set_hwclock() {
 }
 
 set_root_password() {
+    echo "Set the password for root" >/dev/stderr
     passwd
 }
 
-get_dir() {
-    echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+create_user() {
+    local name=$1
+    useradd -m -G wheel -s /bin/zsh $name
+    echo "Set the password for $name" >/dev/stderr
+    passwd $name
+    sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
 }
 
 dir=$(get_dir)
@@ -78,6 +91,7 @@ generate_locales
 set_timezone
 set_hwclock
 set_root_password
+create_user $username
 ${dir}/aufii
 
 echo "Configuration complete." >/dev/stderr
