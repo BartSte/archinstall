@@ -64,10 +64,6 @@ set_hwclock() {
     hwclock --systohc
 }
 
-enable_sudo_for_wheel_users() {
-    export EDITOR="/visudo_editor" && visudo
-}
-
 set_root_password() {
     passwd
 }

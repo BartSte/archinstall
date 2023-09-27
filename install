@@ -18,7 +18,6 @@ The following is done:
 - The other scripts are downloaded from GitHub using curl and they are made 
   executable. These scripts are:
     - configure
-    - visudo_editor
     - aufii
 - The disk is partitioned with a GPT partition table with:
     - part 1, label "EFI system partition": 512MiB EFI partition (FAT32)
@@ -42,11 +41,9 @@ curl_scripts() {
     url=https://raw.githubusercontent.com/BartSte/archinstall/main
 
     curl -O $url/configure
-    curl -O $url/visudo_editor
     curl -O $url/aufii
 
     chmod +x $this_dir/configure
-    chmod +x $this_dir/visudo_editor
     chmod +x $this_dir/aufii
 }
 
@@ -144,13 +141,11 @@ configure_base_system() {
 
     dir=$(get_dir)
     cp ${dir}/configure /mnt
-    cp ${dir}/visudo_editor /mnt
     cp ${dir}/aufii /mnt
 
     arch-chroot /mnt /configure $disk $hostname
 
     rm /mnt/configure
-    rm /mnt/visudo_editor
     rm /mnt/aufii
 }
 
