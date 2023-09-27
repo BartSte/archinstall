@@ -159,7 +159,7 @@ finalize() {
     echo "Installation complete. You can now reboot if you successfully completed all steps." >/dev/stderr
 }
 
-set -e # Abort on error
+set -e
 
 parse_args $@
 

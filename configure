@@ -85,7 +85,9 @@ create_user() {
     sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
 }
 
+set -e
 dir=$(get_dir)
+
 set_hostname
 generate_locales
 set_timezone
