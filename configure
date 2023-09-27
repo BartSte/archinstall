@@ -88,6 +88,10 @@ make_wheel_sudoers() {
     export EDITOR=$old_editor
 }
 
+enable_internet() {
+    #TODO: enable internet connection on the wifi interface
+}
+
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 set -e
 
