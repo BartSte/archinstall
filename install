@@ -37,18 +37,13 @@ EOF
 
 curl_scripts() {
     local this_dir
-    this_dir=$(get_dir)
     url=https://raw.githubusercontent.com/BartSte/archinstall/main
 
     curl -O $url/configure
     curl -O $url/aufii
 
-    chmod +x $this_dir/configure
-    chmod +x $this_dir/aufii
-}
-
-get_dir() {
-    echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+    chmod +x $SCRIPTPATH/configure
+    chmod +x $SCRIPTPATH/aufii
 }
 
 parse_args() {
@@ -144,9 +139,8 @@ install_base_system() {
 configure_base_system() {
     genfstab -U /mnt >>/mnt/etc/fstab
 
-    dir=$(get_dir)
-    cp ${dir}/configure /mnt
-    cp ${dir}/aufii /mnt
+    cp $SCRIPTPATH/configure /mnt
+    cp $SCRIPTPATH/aufii /mnt
 
     arch-chroot /mnt /configure $disk $hostname $username
 
@@ -159,6 +153,7 @@ finalize() {
     echo "Installation complete. You can now reboot if you successfully completed all steps." >/dev/stderr
 }
 
+SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 set -e
 
 parse_args $@

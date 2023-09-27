@@ -15,16 +15,11 @@ system is already installed. This script will configure the following:
     - a home directory
     - is part of the wheel group
     - can use sudo without a password
-    - uses zsh as the default shell
 - installs and configures EFISTUB using efibootmgr.
 
 Note that the root and user have the same password.
 
 EOF
-}
-
-get_dir() {
-    echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 }
 
 parse_args() {
@@ -79,14 +74,14 @@ set_root_password() {
 
 create_user() {
     local name=$1
-    useradd -m -G wheel -s /bin/zsh $name
+    useradd -m -G wheel $name
     echo "Set the password for $name" >/dev/stderr
     passwd $name
     sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
 }
 
+SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 set -e
-dir=$(get_dir)
 
 set_hostname
 generate_locales
@@ -94,6 +89,6 @@ set_timezone
 set_hwclock
 set_root_password
 create_user $username
-${dir}/aufii
+$SCRIPTPATH/aufii
 
 echo "Configuration complete." >/dev/stderr
