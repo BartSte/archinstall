@@ -43,6 +43,7 @@ curl_scripts() {
     local this_dir
     this_dir=$(get_dir)
     url=https://raw.githubusercontent.com/BartSte/archinstall/main
+
     curl -O $url/configure
     curl -O $url/visudo_editor
     curl -O $url/aufii
@@ -122,14 +123,10 @@ abort() {
 
 partition_disk() {
     parted -s $disk mklabel gpt
-    parted -s $disk mkpart fat32 1MiB 513MiB
-    parted -s $disk mkpart linux-swap 513MiB 4.5GiB
-    parted -s $disk mkpart ext4 4.5GiB 100%
+    parted -s $disk mkpart EFI-part fat32 1MiB 513MiB
+    parted -s $disk mkpart swap-part linux-swap 513MiB 4.5GiB
+    parted -s $disk mkpart root-part ext4 4.5GiB 100%
     parted -s $disk set 1 esp on
-
-    parted -s name 1 "EFI system partition"
-    parted -s name 2 "Swap partition"
-    parted -s name 3 "Root partition"
 }
 
 format_partitions() {
