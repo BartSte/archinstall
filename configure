@@ -76,10 +76,10 @@ set_root_password() {
 }
 
 create_user() {
-    local name=$1
-    useradd -m -G wheel $name
-    echo "Set the password for $name" >/dev/stderr
-    passwd $name
+    echo "Creating user $username" >/dev/stderr
+    useradd -m -G wheel $username
+    echo "Set the password for $username" >/dev/stderr
+    passwd $username
     sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
 }
 
@@ -91,7 +91,7 @@ generate_locales
 set_timezone
 set_hwclock
 set_root_password
-create_user $username
+create_user
 $SCRIPTPATH/aufii
 
 echo "Configuration complete." >/dev/stderr
