@@ -2,7 +2,7 @@
 
 usages() {
     cat <<EOF
-Usage: $0 [options] <disk> <hostname> <username> <password>
+Usage: install [options] <disk> <hostname> <username> <password>
 
 This script will install Arch Linux on the specified disk. The disk will be
 partitioned and formatted. The script will then install the base system and
