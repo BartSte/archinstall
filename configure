@@ -88,9 +88,6 @@ make_wheel_sudoers() {
     export EDITOR=$old_editor
 }
 
-enable_internet() {
-    #TODO: enable internet connection on the wifi interface
-}
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 set -e
@@ -104,6 +101,7 @@ set_hwclock
 set_root_password
 create_user
 make_wheel_sudoers
+systemctl enable NetworkManager
 $SCRIPTPATH/aufii
 
 echo "Configuration complete." >/dev/stderr
