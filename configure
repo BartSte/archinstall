@@ -71,14 +71,14 @@ set_hwclock() {
 }
 
 set_root_password() {
-    echo "Set the password for root" >/dev/stderr
+    echo "Set the password for root" >&2
     passwd
 }
 
 create_user() {
-    echo "Creating user $username" >/dev/stderr
+    echo "Creating user $username" >&2
     useradd -m -G wheel $username
-    echo "Set the password for $username" >/dev/stderr
+    echo "Set the password for $username" >&2
     passwd $username
 }
 
@@ -88,6 +88,10 @@ make_wheel_sudoers() {
     export EDITOR=$old_editor
 }
 
+get_dotfiles() {
+    echo "Copying dotfiles" >&2
+    curl -O https://raw.githubusercontent.com/BartSte/dotfiles-linux/master/dotfiles-linux/initialize
+}
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 set -e
@@ -103,5 +107,6 @@ create_user
 make_wheel_sudoers
 systemctl enable NetworkManager
 $SCRIPTPATH/aufii
+get_dotfiles
 
-echo "Configuration complete." >/dev/stderr
+echo "Configuration complete." >&2

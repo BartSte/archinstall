@@ -109,11 +109,11 @@ is_clock_synchronized() {
 }
 
 warn() {
-    echo "WARNING: $1" >/dev/stderr
+    echo "WARNING: $1" >&2
 }
 
 abort() {
-    echo "ERROR: $1" >/dev/stderr
+    echo "ERROR: $1" >&2
     exit 1
 }
 
@@ -158,7 +158,7 @@ configure_base_system() {
 
 finalize() {
     umount -R /mnt
-    echo "Installation complete. You can now reboot if you successfully completed all steps." >/dev/stderr
+    echo "Installation complete. You can now reboot if you successfully completed all steps." >&2
 }
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
