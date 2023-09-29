@@ -72,7 +72,7 @@ set_hwclock() {
 
 set_root_password() {
     echo "Set the password for root" >&2
-    while ! passwd $username; do
+    while ! passwd; do
         echo "Set the password for root" >&2
     done
 }
