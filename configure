@@ -72,14 +72,18 @@ set_hwclock() {
 
 set_root_password() {
     echo "Set the password for root" >&2
-    passwd
+    while ! passwd $username; do
+        echo "Set the password for root" >&2
+    done
 }
 
 create_user() {
     echo "Creating user $username" >&2
     useradd -m -G wheel $username
     echo "Set the password for $username" >&2
-    passwd $username
+    while ! passwd $username; do
+        echo "Set the password for $username" >&2
+    done
 }
 
 make_wheel_sudoers() {
