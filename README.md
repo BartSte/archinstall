@@ -24,10 +24,11 @@ curl -O https://raw.githubusercontent.com/BartSte/archinstall/main/install
 Next, run the script with the arguments you want. For example:
 
 ```bash
-bash install /dev/sda my-hostname
+bash install /dev/sda my-hostname username
 ```
 
-which will install arch on `/dev/sda` and set the hostname to `my-hostname`.
+which will install arch on `/dev/sda` and set the hostname to `my-hostname` and
+the username to `username`.
 
 ## Credits
 
