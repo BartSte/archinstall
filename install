@@ -19,6 +19,7 @@ The following is done:
   executable. These scripts are:
     - configure
     - aufii
+    - visudo_editor
 - The disk is partitioned with a GPT partition table with:
     - part 1, label "EFI system partition": 512MiB EFI partition (FAT32)
     - part 2, label "Swap partition": 4GiB swap partition (swap)
