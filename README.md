@@ -15,7 +15,7 @@ instead of using these scripts.
 ## Usage
 
 After you booted into arch using a live USB, make connection to the internet.
-You can plugin a network cable (not configuration neede), or you can use the
+You can plugin a network cable (not configuration needed), or you can use the
 wifi. The latter needs some configuration using `iwctl` which is supplied by
 the environment on the USB. Do the following
 
@@ -55,6 +55,15 @@ to create. After running the script, the following will be done:
 - Later, `configure` executes `aufii` script which starts an interactive
   tool to generate the `efibootmgr` commands into an executable. The `aufii`
   script was not written by me (see [credits](#credits)).
+- The `configure` script will ask you to provide the EFI partition, which is
+  partition 1 in our case (which results in `/dev/sdap1` if you installed arch
+  on `/dev/sda`).
+- Later, support for `microcode` can be added. Do this if you have an Intel
+  processor. I did not test this with an AMD processor yet.
+- After that, you can choose the kernel you want to install. I only tested
+  `linux` until now.
+- Finally, the `efibootmgr` command is ready. You can execute is immediately
+  , or later. The executable is located at `/UEFI_gen`.
 
 After the script is done, you can reboot into your new system. You can login
 using the username and password you provided. Note that you do not have wifi,
